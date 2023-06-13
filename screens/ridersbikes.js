@@ -10,20 +10,20 @@ import { Text,
 import styles from '../assets/styles/style';
 
 function Ridersbikes ( { route, navigation }) {
-    //variabler skapas för den params som skicakdes med från ourriders sidan:
+    //variable to save params :
     const {ridersName} = route.params;
     const {id} = route.params;
    
-    //usestate för att se om API anroppet laddas eller ej. är isLAoding True visas Loading... på sidan. 
+    //usestate is used to show "Loading..." while result is being fetched.
     const [isLoading, setLoading] = useState(true);
 
-    //useState används för att uppdatera variablen mtb efter att data har hämtas in API:et.
+    //useState to update new data fetched from the API
     const [mtb, setMtb] = useState([]);
 
-    //om isLoadig är sant så Fetching data från API:ET för det spesefika ID nummersom den valde cyklisten har:
+    //if isLoadig is true: Fetching data from the APIfor the picked rider by inserting the ID :
     if (isLoading == true) {
-        //feth körs direkt. om det ska köras vid ett särskilt tillfälle lägg den i en funkyion och körden. 
-        fetch (`https://attractive-slug-gear.cyclic.app/mtb/getOne/${id}`)
+       
+        fetch (`https://.....cyclic.app/mtb/getOne/${id}`)
         .then (response => response.json())
         .then (mtb => {
             setLoading('false');
@@ -41,18 +41,16 @@ function Ridersbikes ( { route, navigation }) {
                 <View style={styles.containerridersbikes}>
                     <View style={styles.imageswrap}>
 
-                        {/**bilden från API visas*/}
                         <Image 
                             style={styles.image}
                             source={{uri: mtb.img,
                             }} 
                         />
                     </View>     
-              
-                    {/** Om API anroppet laddas skrivs Loading.. ut:*/}
+
                     {isLoading == true && <Text style={styles.htext}>Loading...</Text>}
                     
-                    {/**All information från databasen för vald cyklist skrivs ut: */}
+                    {/**All info from the DB renders*/}
                     <Text style={styles.hridertext}>{ridersName} rides:</Text> 
                     <Text style={styles.hbrandtext}>{mtb.brand}</Text> 
                     <Text style={styles.paratext}>Model: {mtb.model}</Text> 

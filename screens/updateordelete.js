@@ -5,11 +5,10 @@ import { useState } from 'react';
 
 function Updateordelete  ( { route, navigation }) {
         
-    //useState används för att uppdatera variablen mtb efter att data har hämtas in API:et.
+    //useState to update new data fetched from the API
     const [mtb, setMtb] = useState([]);
 
-    //alla params som skickades med från förgående sidan (admin) sparas i vars sin variabel:
-    const {ridersName} = route.params;
+    //variable to save params :
     const {id} = route.params;
     const {ridersBrand} = route.params;
     const {ridersModel} = route.params;
@@ -17,8 +16,7 @@ function Updateordelete  ( { route, navigation }) {
     const {ridersFork} = route.params;
     const {ridersShock} = route.params;
   
-    //sätter variblers stadie: de börjar med de namn, brand, model mm som skicaks med från förgående sida (admin).
-    //detta gör att om en del inte ändras av användaren kommer de fortfarande ha sitt orginal värde. 
+    //sset variables with strings from params 
     const [name, setName] = useState(ridersName);
     const [brand, setBrand] = useState(ridersBrand);
     const [model, setModel] = useState(ridersModel);
@@ -26,10 +24,7 @@ function Updateordelete  ( { route, navigation }) {
     const [fork, setFork] = useState(ridersFork);
     const [shock, setShock] = useState(ridersShock);
     
-    // jag har sökt hjälp från https://www.geeksforgeeks.org/how-to-make-a-post-request-from-frontend-in-react-native/
-    //för att genomföra en POST till mitt API:
-    //jag gör ändringar i det jag lärt mig för att passa mitt projekt och min POST:
-    //skapar en variabel där jag använder POST metoden och gör informationen i bodyn till en sträng så att det kan föras in i Databasen: 
+    //POST to the API:
     const postOption = {
         method: 'POST',
         headers: { 
@@ -45,16 +40,15 @@ function Updateordelete  ( { route, navigation }) {
         }),
     }
 
-    //En funktion för att EDIT en cyklist information skapas, denna funktion kallas på när användaren klickar på "Add edit" knappen. 
+    //Function that executes when user cliks on "Add Edit". 
     const editRiderToAPI = async () => {
-        //en fetch görs till den URL som används när ett objekt ska ändras, med rätt id från vald cyklist. 
-        // till denna fetchen läggs variablen: postOption till så att denna information läggs in i databasen:
-        fetch (`https://attractive-slug-gear.cyclic.app/mtb/UPDATE/${id}`, postOption ) 
+
+        fetch (`https://......cyclic.app/mtb/UPDATE/${id}`, postOption ) 
         .then (response => {
             response.json()
             .then (mtb => {
                 setMtb(mtb)
-                //en Alert ruta medelar att användaren har ändrat ett okjekt.
+                //an Alert for changes made:
                 Alert.alert("You edit:\n" + name + " " + brand + " " + model + " " + colour + " " + fork + " " + shock );
                 
             })
@@ -64,7 +58,7 @@ function Updateordelete  ( { route, navigation }) {
         });
     }
 
-    //samma teknik som ovan används för att genomföra en DELETE men jag byter till DELETE istället för POST och använde rätt URL för DELETE:
+    //DELETE
     const deleteOption = {
         method: 'DELETE',
         headers: { 
@@ -82,7 +76,7 @@ function Updateordelete  ( { route, navigation }) {
 
     //DELETE 
     const deleteRiderFromAPI = async () => {
-        fetch (`https://attractive-slug-gear.cyclic.app/mtb/DELETE/${id}`, deleteOption ) 
+        fetch (`https://.....cyclic.app/mtb/DELETE/${id}`, deleteOption ) 
             .then (response => {
                 response.json()
                 .then (mtb => {
@@ -104,7 +98,6 @@ function Updateordelete  ( { route, navigation }) {
                         <View style={styles.inputfilleditem}>
                             <Text style={styles.paratext}>Name:</Text>
                         </View>
-                        {/**För varje förändring användaren gör i de olike inpit fälten sparas det nya stadiet med hjälp av onCHangeTaxt och useState: */}
                         <View style={styles.inputfilleditem}>
                             <TextInput 
                                 maxLength={40}
@@ -185,7 +178,7 @@ function Updateordelete  ( { route, navigation }) {
                             />
                         </View>
                         
-                    {/**När användaren klickar på knappen Add edist trigags editRiderToAPI funtionen: */}
+                    {/**The function editRiderToAPI is called When user clicks on Add edist*/}
                     <View style={styles.buttonwrapperupdatedelete}>
                         <Button 
                             color={'#4E6448'}
@@ -197,7 +190,7 @@ function Updateordelete  ( { route, navigation }) {
                         />
                     </View>
 
-                    {/**När användaren klickar på knappen Delete trigags eleteRiderFromAPI funtionen: */}
+                    {/**The function deleteRiderFromAPI is called When user clicks on Delete*/}
                     <View style={styles.buttonwrapperupdatedelete}>
                         <Button 
                             color={'red'}

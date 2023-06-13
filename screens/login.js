@@ -15,18 +15,13 @@ import styles from '../assets/styles/style';
 
 function Login ( { navigation }) {
 
-    //Två variabler för email och lösenord skapas för att sätta deras olika stadier
-    //, här kommer en sträng spars:
+    //save the state of the email and password variable:
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    //Jag har valt att skapa ett enkelt log in system för att demostrerat att jag vill att det är enbart admin som ska kunna ändra i API/databasen.
-    // detta är inte ett optimalt inloggning för emailen och lösenordet är hårdkodat och inte kopplat till en databas där lösen ordet är hashat. 
-    
-    //funktion onSubmit som kollar om lösenord och email stämmer stämmer det skickas användaren till Admin sidan. 
-    //funtionen onSubmit kallas på när användaren trycker på knappen Countinue:
+    //very simple login system
     const onSubmit = () => {
-        if (email == "admin@meanwoodmtb.com" && password == "123") {
+        if (email == "!!" && password == "!!") {
             navigation.navigate('Admin')
         }
         else {
@@ -65,11 +60,11 @@ function Login ( { navigation }) {
                         placeholder="Password"
                         secureTextEntry={true}
 
-                        //när en förändring sker sparas förändringen i password:
+                        //changes saves to password:
                         onChangeText={(password) => setPassword(password)}
                     />
 
-                    {/**Nät knappen trycks på körs functionen onSubmit */}
+                    {/**executing onSubmit */}
                     <View style={styles.buttonwrapperupdatedelete}>
                         <Button 
                             color={'#4E6448'}

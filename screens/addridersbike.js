@@ -9,17 +9,13 @@ import {
     ScrollView,
     Image
 } from 'react-native';
-
 import styles from '../assets/styles/style';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
-import { manipulateAsync, resize, SaveFormat } from 'expo-image-manipulator';
-
-
 
 function Addridersbike ( { navigation }) {
-    //sätter variblers stadie på de olika delar som ska läggas till i databasen: 
+    //set the variables state on the different parts that will be added to the DB. 
     const [name, setName] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
@@ -27,14 +23,23 @@ function Addridersbike ( { navigation }) {
     const [fork, setFork] = useState('');
     const [shock, setShock] = useState('');
     const [mtb, setMtb] = useState([]);
-    //variabel som spara den valda bilden från mobilens lokala biblitotek. 
-    const [selectedImage, setSelectedImage] = useState(null);
-    //variabel som sparar bilden efter den blivit konverterad till binData
-    const [photo64, setPhoto64] = useState('');
-    const [width, setWidth] = useState(null);
-    const [height, setHeight] = useState(null);
 
-    //funktion som tar hand om resultatet från den valde bilden.
+    //the images picked from the moblies local storage saves to this variable
+    const [selectedImage, setSelectedImage] = useState(null);
+    //variabel som sparar stadiet bilden efter den blivit konverterad till binData
+    const [photo64, setPhoto64] = useState('');
+    const [fileSize, setFileSize] = useState(null);
+
+    //function that checks the files size
+    //:https://stackoverflow.com/questions/41372152/react-native-how-to-get-file-size-mime-type-and-extension
+    //expo FileSystem docs:
+    //https://docs.expo.dev/versions/latest/sdk/filesystem/#filesystemgetinfoasyncfileuri-options
+    getFileSize = async () => {
+        let fileInfo = await FileSystem.getInfoAsync(selectedImage);
+        setFileSize(fileInfo.size); 
+    };
+    
+    //function that deals with the result from the choosen images
     //https://docs.expo.dev/tutorial/image-picker/
     const pickImageAsync = async () => {
         try {
@@ -43,48 +48,53 @@ function Addridersbike ( { navigation }) {
                 aspect: [1, 1],
                 quality: 0.1
             });
-            //bildens uri sparas i selectedImage variablen
+
+            //the images uri saves in selectedImage variable.
             setSelectedImage(result.assets[0].uri);
-            setWidth(result.width);
-            setHeight(result.height);
             
-            //SKRIV REF
-            //en variabel skapas där bildens uri från mobilens lokala bibliotek görs om till base64 så att den kan skicaks till API och sparas i databasen. 
+            //the images uri transforms to base64 to be sent to the API and saved in the DB, saves in this variable.
+            //https://stackoverflow.com/questions/34908009/react-native-convert-image-url-to-base64-string/57454653#57454653?newreg=6e1e63e1bc9f40aaafbb5b231b611bc9
+            //https://docs.expo.dev/versions/latest/sdk/filesystem/#filesystemreadasstringasyncfileuri-options
             const base64 = await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' });
             
-            //base64 sparas tillphoto64 inkluderad text som behövs för att kunna visa upp bilden. 
-            //dena variabel skickas sedan med i POST till API:et
+            //base64 saves to  photo64 including text that needs to show the images.
             setPhoto64('data:image/jpeg;base64,' + base64);
-            //expo-image-manipulator documentetion
-            const newSize = await manipulateAsync(photo64, [
-                {resize: {width: 200, height: 200}},
-                ],
-                {base64: true, compress: 1, format: SaveFormat.PNG}
-            );
-            //sätter nytt stadie på selected image
-            setSelectedImage(newSize);
-            //sätter nytt stadie med den nya filens base64
-            setPhoto64('data:image/jpeg;base64,' + newSize.base64);
+            getFileSize(fileSize);
         }
+        //catches error:
         catch(error){
           console.log(`my Error : ${error}`);
-          
+        }
+    };
+    
+
+    //function that executes when the user adds a rider:
+    const sendData = async () => {
+        //if statement that check image size: 
+        //if images is 55000 or smaller it can be used.:
+        if(fileSize <= 55000) {
+           
+            console.log('Correct size is choosen')
+
+            //function that sends the data to the API:
+            postNewRiderToAPI();
+
+            //user navigates back to admin:
+            navigation.navigate('Admin');
+        }
+       
+        else if(fileSize >= 55000) {
+            console.log(fileSize)
+            //if the images is to large:
+            Alert.alert('Your image is to large, \nPlease choose a smaller images')
+        }
+        else{
+            console.log('Will not work' + fileSize)
         }
     };
 
-    /*const reSize = async () => {
-        else
-        {
-            Alert.alert('Your Images is to big please pick one that is 1500 pixels or smaller' );
-            console.log('To big');
-        }
-    }*/
-
-    // jag har sökt hjälp från https://www.geeksforgeeks.org/how-to-make-a-post-request-from-frontend-in-react-native/
-    //för att genomföra en POST till mitt API:
-    //jag gör ändringar i det jag lärt mig för att passa mitt projekt och min POST:
-    //skapar en variabel där jag använder POST metoden och gör informationen i bodyn till en sträng så att det kan föras in i Databasen: 
-    //I bodyn hårdkodar jag in en binarydata för en bild som kommer läggas till i varje nytt objekt:
+    //https://www.geeksforgeeks.org/how-to-make-a-post-request-from-frontend-in-react-native/
+    //POST to the API:
     const postOption = {
         method: 'POST',
         headers: { 
@@ -100,11 +110,10 @@ function Addridersbike ( { navigation }) {
             img: photo64
         }),
     }
-    //console.log('postOption' + postOption.body);
-    //En funktion för att lägag till en  ny cyklist information skapas, denna funktion kallas på när användaren klickar på "Add Rider" knappen. 
-
-    const postNewRiderToAPI = async () => {
-    fetch ('https://attractive-slug-gear.cyclic.app/mtb/CREATE', postOption ) 
+   
+    //Function that executes when user cliks on "Add Rider". 
+    const postNewRiderToAPI = async () => { 
+        fetch ('https://......cyclic.app/mtb/CREATE', postOption ) 
         .then (response => {
             response.json()
             .then (mtb => {
@@ -129,7 +138,7 @@ function Addridersbike ( { navigation }) {
                             <Text style={styles.paratextlogin}>Name:</Text>
                         </View>
                                             
-                        {/*För varje förändring användaren gör i de olike inpit fälten sparas det nya stadiet med hjälp av onCHangeTaxt och useState: */}
+                        {/*all changes saves to the variable with help of onChangeText and useState: */}
                         <View style={styles.inputfilleditem}>
                             <TextInput 
                                 editable
@@ -232,8 +241,8 @@ function Addridersbike ( { navigation }) {
                             color={'#4E6448'}
                             title='Add Rider' 
                             onPress={()=> {
-                                postNewRiderToAPI();
-                                navigation.navigate('Admin');
+                                sendData();
+                                
                             }}
                         />
                     </View>
